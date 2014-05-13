@@ -7,4 +7,4 @@ Python script to detect faces in images and align them based on the largest face
 
 Set the output image size, the scaling, the framerate and the position that you want the faces to align in the file.
 
-YOLO :/
+YOLO :-/
