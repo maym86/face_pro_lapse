@@ -12,9 +12,9 @@ if __name__ == "__main__":
     face_cascade1 = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
     face_cascade2 = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
-    finalHeight = 300
+    faceHeight = 300
     outSize = (1280 ,720)
-    centre = (outSize[0]/2,outSize[1]/2)
+    centre = (outSize[0]/2 - faceHeight/2,outSize[1]/2 - faceHeight/2)
     
     for fname in imgs:
         img = cv2.imread(fname)
@@ -34,7 +34,7 @@ if __name__ == "__main__":
         #sort to get the largest    
         (x,y,w,h) = sorted(faces, key=lambda x: x[2])[0]      
 
-        scale = float(finalHeight) / float(h)
+        scale = float(faceHeight) / float(h)
         scaled = cv2.resize(img, (0,0), fx=scale, fy=scale)
 
         rows,cols = gray.shape
