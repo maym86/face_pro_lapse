@@ -4,7 +4,7 @@ import sys
 import cv2, cv
 import glob
 import numpy as np
-
+import math
 
 if __name__ == "__main__":
     imgs = glob.glob("images/*.jpg")
@@ -12,7 +12,7 @@ if __name__ == "__main__":
     fps = 2.0
     faceHeight = 300
     videoSize = (1280 ,720)
-    centre = (outSize[0]/2,outSize[1]/2)
+    centre = (videoSize[0]/2,videoSize[1]/2)
     
     face_cascade = []
 
@@ -20,6 +20,8 @@ if __name__ == "__main__":
     face_cascade.append(cv2.CascadeClassifier('haarcascade_frontalface_default.xml'))
     face_cascade.append(cv2.CascadeClassifier('haarcascade_eye_tree_eyeglasses.xml'))
 
+    eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
+    
     fourcc = cv2.cv.CV_FOURCC('M', 'J', 'P', 'G')
     video = cv2.VideoWriter('video.avi',fourcc, fps, videoSize)
     
@@ -40,10 +42,19 @@ if __name__ == "__main__":
         if len(faces) == 0:
             continue
         
-         
+        
         #sort to get the largest    
         face = sorted(faces, key=lambda x: x[3])[-1]      
+        (x,y,w,h) = face
+        
+        roi_gray = gray[y:y+h, x:x+w]
+        eyes = eye_cascade.detectMultiScale(roi_gray)
+        if len(eyes) >= 2:
+            eyeAngle = math.atan((eyes[0][1] - eyes[1][1])/(eyes[0][0] - eyes[1][0]))
+        else:
+            eyeAngle = 0
 
+                
         scale = float(faceHeight) / float(face[3])
         scaled = cv2.resize(img, (0,0), fx=scale, fy=scale)
 
@@ -53,8 +64,12 @@ if __name__ == "__main__":
         M = np.float32([[1,0,(centre[0] -w/2) - x],[0,1,(centre[1] -h/2) - y]])
         moved = cv2.warpAffine(scaled,M,videoSize)
 
-        video.write(moved)
-        cv2.imshow('face',moved)
+
+        rot_mat = cv2.getRotationMatrix2D(centre,eyeAngle,1.0)
+        rotated = cv2.warpAffine(moved, rot_mat, videoSize)
+  
+        video.write(rotated)
+        cv2.imshow('face',rotated)
         cv2.waitKey(100)
         
 
