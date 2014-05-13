@@ -15,6 +15,9 @@ if __name__ == "__main__":
     faceHeight = 300
     outSize = (1280 ,720)
     centre = (outSize[0]/2 - faceHeight/2,outSize[1]/2 - faceHeight/2)
+
+    fourcc = cv2.cv.CV_FOURCC(*'MPEG')
+    out = cv2.VideoWriter('output.avi',fourcc, 20.0, outSize)
     
     for fname in imgs:
         img = cv2.imread(fname)
@@ -41,10 +44,13 @@ if __name__ == "__main__":
  
         M = np.float32([[1,0,centre[0] - float(x)*scale],[0,1,centre[1] - float(y)*scale]])
         moved = cv2.warpAffine(scaled,M,outSize)
-       
+
+        out.write(moved)
         cv2.imshow('face',moved)
         cv2.waitKey(1)
+        
 
-
+    out.release()
+    cv2.destroyAllWindows()
                 
             
