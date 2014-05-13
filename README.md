@@ -1,5 +1,5 @@
-AlignedSelfiesVideoGenerator
-============================
+Align Selfies: Video Generator
+==============================
 
 Yep, made something for selfies. Shoot me.
 
