@@ -9,18 +9,19 @@ import numpy as np
 if __name__ == "__main__":
     imgs = glob.glob("images/*.jpg")
     
+    fps = 2.0
+    faceHeight = 300
+    videoSize = (1280 ,720)
+    centre = (outSize[0]/2,outSize[1]/2)
+    
     face_cascade = []
 
     face_cascade.append(cv2.CascadeClassifier('haarcascade_frontalface_alt.xml'))
     face_cascade.append(cv2.CascadeClassifier('haarcascade_frontalface_default.xml'))
     face_cascade.append(cv2.CascadeClassifier('haarcascade_eye_tree_eyeglasses.xml'))
 
-    faceHeight = 300
-    outSize = (1280 ,720)
-    centre = (outSize[0]/2,outSize[1]/2)
-
     fourcc = cv2.cv.CV_FOURCC('M', 'J', 'P', 'G')
-    video = cv2.VideoWriter('video.avi',fourcc, 1.0, outSize)
+    video = cv2.VideoWriter('video.avi',fourcc, fps, videoSize)
     
     for fname in imgs:
         img = cv2.imread(fname)
@@ -50,7 +51,7 @@ if __name__ == "__main__":
         (x,y,w,h) = tuple([scale*x for x in face])
         
         M = np.float32([[1,0,(centre[0] -w/2) - x],[0,1,(centre[1] -h/2) - y]])
-        moved = cv2.warpAffine(scaled,M,outSize)
+        moved = cv2.warpAffine(scaled,M,videoSize)
 
         video.write(moved)
         cv2.imshow('face',moved)
