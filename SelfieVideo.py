@@ -17,10 +17,10 @@ if __name__ == "__main__":
 
     faceHeight = 300
     outSize = (1280 ,720)
-    centre = (outSize[0]/2 - faceHeight/2,outSize[1]/2 - faceHeight/2)
+    centre = (outSize[0]/2,outSize[1]/2)
 
-    fourcc = cv2.cv.CV_FOURCC(*'MPEG')
-    video = cv2.VideoWriter('output.avi',fourcc, 1.0, outSize)
+    fourcc = cv2.cv.CV_FOURCC('M', 'J', 'P', 'G')
+    video = cv2.VideoWriter('video.avi',fourcc, 1.0, outSize)
     
     for fname in imgs:
         img = cv2.imread(fname)
@@ -41,12 +41,15 @@ if __name__ == "__main__":
         
          
         #sort to get the largest    
-        (x,y,w,h) = sorted(faces, key=lambda x: x[3])[-1]      
+        face = sorted(faces, key=lambda x: x[3])[-1]      
 
-        scale = float(faceHeight) / float(h)
+        scale = float(faceHeight) / float(face[3])
         scaled = cv2.resize(img, (0,0), fx=scale, fy=scale)
- 
-        M = np.float32([[1,0,centre[0] - float(x)*scale],[0,1,centre[1] - float(y)*scale]])
+
+        #rescale face
+        (x,y,w,h) = tuple([scale*x for x in face])
+        
+        M = np.float32([[1,0,(centre[0] -w/2) - x],[0,1,(centre[1] -h/2) - y]])
         moved = cv2.warpAffine(scaled,M,outSize)
 
         video.write(moved)
