@@ -28,7 +28,8 @@ if __name__ == "__main__":
     for fname in imgs:
         img = cv2.imread(fname)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        
+
+        # find faces in the image using all possible Haar cascades
         faces = []
         for cascade in face_cascade:
             f = cascade.detectMultiScale(gray, 1.5, 5)
@@ -43,10 +44,12 @@ if __name__ == "__main__":
             continue
         
         
-        #sort to get the largest    
+        #Sort to get the largest face  
         face = sorted(faces, key=lambda x: x[3])[-1]      
         (x,y,w,h) = face
-        
+
+
+        #try to find eyes to get head rotation
         roi_gray = gray[y:y+h, x:x+w]
         eyes = eye_cascade.detectMultiScale(roi_gray)
         if len(eyes) >= 2:
@@ -54,22 +57,26 @@ if __name__ == "__main__":
         else:
             eyeAngle = 0
 
-                
+
+        #rescale to desired face size  
         scale = float(faceHeight) / float(face[3])
         scaled = cv2.resize(img, (0,0), fx=scale, fy=scale)
 
-        #rescale face
+        #rescale face rect
         (x,y,w,h) = tuple([scale*x for x in face])
-        
+
+        #move the image so the face is centred
         M = np.float32([[1,0,(centre[0] -w/2) - x],[0,1,(centre[1] -h/2) - y]])
-        moved = cv2.warpAffine(scaled,M,videoSize)
+        out = cv2.warpAffine(scaled,M,videoSize)
 
+        #rotate if angle eye angle is off centre
+        if eyeAngle:
+            rot_mat = cv2.getRotationMatrix2D(centre,eyeAngle,1.0)
+            out = cv2.warpAffine(out, rot_mat, videoSize)
 
-        rot_mat = cv2.getRotationMatrix2D(centre,eyeAngle,1.0)
-        rotated = cv2.warpAffine(moved, rot_mat, videoSize)
-  
-        video.write(rotated)
-        cv2.imshow('face',rotated)
+        #write to video file      
+        video.write(out)
+        cv2.imshow('face',out)
         cv2.waitKey(100)
         
 
