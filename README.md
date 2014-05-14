@@ -9,8 +9,8 @@ http://youtu.be/1eyJukKPo3g
 
 Put your images in ./images
 
-Set the output image size, the desired face size and the framerate.
+Set the output image size, the desired face size and the framerate in the main method. (fps, faceHeight, videoSize)
 
-If the face isn't found a selection window will appear. Draw a box around the face and press "ESC" when you're happy.
+If the face isn't found a selection window will appear if the manualMode variable is set True. Draw a box around the face and press "a" when you're happy or "ESC" to skip that image.
 
 YOLO :-/

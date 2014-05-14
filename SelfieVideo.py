@@ -44,7 +44,7 @@ def SelectFaceManually(img):
     
 
 
-def FindLargestFace(gray, faceCascades):
+def FindLargestFace(gray, faceCascades, manualMode):
     # find faces in the image using all possible Haar cascades
     faces = []
     for cascade in faceCascades:
@@ -56,8 +56,10 @@ def FindLargestFace(gray, faceCascades):
                 faces = np.concatenate((faces,f))    
 
     #if no face is found manually select face
-    if len(faces) == 0:
-        face = SelectFaceManually(img)            
+    if len(faces) == 0 and manualMode:
+        face = SelectFaceManually(img)
+    elif len(faces) == 0:
+        return []
     else:
         #Sort to get the largest face  
         face = sorted(faces, key=lambda x: x[3])[-1]
@@ -85,12 +87,14 @@ def HistEqualisationColour(img):
 
 if __name__ == "__main__":
     imgs = glob.glob("images/*.jpg")
-    
+
+    #Parameters
     fps = 4.0
     faceHeight = 300
     videoSize = (1280 ,720)
-    centre = (videoSize[0]/2,videoSize[1]/2)
+    manualMode = True
     
+    centre = (videoSize[0]/2,videoSize[1]/2)    
     faceCascades = []
 
     faceCascades.append(cv2.CascadeClassifier('haarcascade_frontalface_alt.xml'))
@@ -108,9 +112,9 @@ if __name__ == "__main__":
         #img = HistEqualisationColour(img)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        face = FindLargestFace(gray, faceCascades)
+        face = FindLargestFace(gray, faceCascades, manualMode)
         
-        if not face:
+        if face == []:
             continue
         
         eyeAngle = FindEyeAngle(gray, face)
