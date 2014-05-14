@@ -97,11 +97,15 @@ def PositionImage(img, face, eyeAngle):
 
     #move the image so the face is centred
     translate = np.float32([[1,0,(centre[0] -w/2) - x],[0,1,(centre[1] -h/2) - y]])
-    #rotate around the centre to eye angle
-    rotate = cv2.getRotationMatrix2D(centre,eyeAngle,1.0)
     translated = cv2.warpAffine(scaled,translate,videoSize)
-    rotated = cv2.warpAffine(translated, rotate, videoSize)
-    return rotated
+    
+    #rotate around the centre to eye angle
+    if eyeAngle:
+        rotate = cv2.getRotationMatrix2D(centre,eyeAngle,1.0)
+        rotated = cv2.warpAffine(translated, rotate, videoSize)
+        return rotated
+
+    return translated
 
 
 if __name__ == "__main__":
