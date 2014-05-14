@@ -23,6 +23,7 @@ def OnMouse(event, x, y, flags, params):
     elif event == cv.CV_EVENT_MOUSEMOVE and drawingBox:
         box = (box[0], box[1] , x - box[0] ,y - box[1])
         
+        
 def SelectFaceManually(img):
     global box
     cv2.namedWindow('Click Face')
@@ -41,8 +42,7 @@ def SelectFaceManually(img):
             cv2.destroyAllWindows()
             box = []
             return []
-    
-
+        
 
 def FindLargestFace(gray, faceCascades, manualMode):
     # find faces in the image using all possible Haar cascades
@@ -66,6 +66,7 @@ def FindLargestFace(gray, faceCascades, manualMode):
 
     return face
 
+
 def FindEyeAngle(gray, face):
     (x,y,w,h) = face
     #try to find eyes to get head rotation
@@ -77,12 +78,30 @@ def FindEyeAngle(gray, face):
         eyeAngle = 0        
     return eyeAngle
 
+
 def HistEqualisationColour(img):
     ycrcb = cv2.cvtColor(img, cv.CV_BGR2YCrCb)
     y,Cr,Cb = cv2.split(ycrcb)
     y = cv2.equalizeHist(y);
     ycrcb = cv2.merge((y,Cr,Cb))
     return cv2.cvtColor(ycrcb,cv.CV_YCrCb2BGR);
+
+
+def PositionImage(img, face, eyeAngle):
+    #rescale to desired face size  
+    scale = float(faceHeight) / float(face[3])
+    scaled = cv2.resize(img, (0,0), fx=scale, fy=scale)
+
+    #rescale face rect
+    (x,y,w,h) = [scale*x for x in face]
+
+    #move the image so the face is centred
+    translate = np.float32([[1,0,(centre[0] -w/2) - x],[0,1,(centre[1] -h/2) - y]])
+    #rotate around the centre to eye angle
+    rotate = cv2.getRotationMatrix2D(centre,eyeAngle,1.0)
+    translated = cv2.warpAffine(scaled,translate,videoSize)
+    rotated = cv2.warpAffine(translated, rotate, videoSize)
+    return rotated
 
 
 if __name__ == "__main__":
@@ -118,30 +137,13 @@ if __name__ == "__main__":
             continue
         
         eyeAngle = FindEyeAngle(gray, face)
-
-
-        #rescale to desired face size  
-        scale = float(faceHeight) / float(face[3])
-        scaled = cv2.resize(img, (0,0), fx=scale, fy=scale)
-
-        #rescale face rect
-        (x,y,w,h) = [scale*x for x in face]
-
-        #move the image so the face is centred
-        M = np.float32([[1,0,(centre[0] -w/2) - x],[0,1,(centre[1] -h/2) - y]])
-        out = cv2.warpAffine(scaled,M,videoSize)
-
-        #rotate if angle eye angle is off centre
-        if eyeAngle:
-            rot_mat = cv2.getRotationMatrix2D(centre,eyeAngle,1.0)
-            out = cv2.warpAffine(out, rot_mat, videoSize)
+        out = PositionImage(img, face, eyeAngle)
 
         #write to video file      
         video.write(out)
         cv2.imshow('face',out)
         cv2.waitKey(1)
-        
-
+ 
     video.release()
     cv2.destroyAllWindows()
                 
