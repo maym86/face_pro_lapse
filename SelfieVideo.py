@@ -6,6 +6,17 @@ import glob
 import numpy as np
 import math
 
+def HistEqualisationColour(img):
+
+    ycrcb = cv2.cvtColor(img, cv.CV_BGR2YCrCb)
+    y,Cr,Cb = cv2.split(ycrcb)
+
+    y = cv2.equalizeHist(y);
+    ycrcb = cv2.merge((y,Cr,Cb))
+
+    return cv2.cvtColor(ycrcb,cv.CV_YCrCb2BGR);    
+
+
 if __name__ == "__main__":
     imgs = glob.glob("images/*.jpg")
     
@@ -27,6 +38,7 @@ if __name__ == "__main__":
     
     for fname in imgs:
         img = cv2.imread(fname)
+        #img = HistEqualisationColour(img)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # find faces in the image using all possible Haar cascades
