@@ -16,6 +16,13 @@ def HistEqualisationColour(img):
 
     return cv2.cvtColor(ycrcb,cv.CV_YCrCb2BGR);    
 
+box = []
+temp = []
+def OnMouse(event, x, y, flags):
+    if event == cv.CV_EVENT_LBUTTONDOWN:
+        print 'Mouse Position: '+x+', '+y
+        box.append(x, y)
+        cv2.circle(temp,(x,y), 3, (0,0,255), -1)
 
 if __name__ == "__main__":
     imgs = glob.glob("images/*.jpg")
@@ -55,7 +62,13 @@ if __name__ == "__main__":
 
 
         if len(faces) == 0:
-            continue
+            temp = img.copy() 
+            cv.SetMouseCallback('Click Face', on_mouse, 0)
+            cv2.namedWindow('Click Face')
+            cv2.imshow('Click Face', temp)
+            cv2.waitKey(0)
+            face = (box[0][0], box[0][1] , box[1][0] - box[0][0] ,box[1][1] - box[0][1])
+            box = []
         
         
         #Sort to get the largest face  
