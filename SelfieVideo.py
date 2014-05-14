@@ -9,7 +9,7 @@ import math
 if __name__ == "__main__":
     imgs = glob.glob("images/*.jpg")
     
-    fps = 2.0
+    fps = 4.0
     faceHeight = 300
     videoSize = (1280 ,720)
     centre = (videoSize[0]/2,videoSize[1]/2)
@@ -32,7 +32,7 @@ if __name__ == "__main__":
         # find faces in the image using all possible Haar cascades
         faces = []
         for cascade in face_cascade:
-            f = cascade.detectMultiScale(gray, 1.5, 5)
+            f = cascade.detectMultiScale(gray)
             if len(f) > 0:
                 if len(faces) == 0:
                     faces = f
