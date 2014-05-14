@@ -32,12 +32,16 @@ def SelectFaceManually(img):
         if box:
             cv2.rectangle(temp, (box[0],box[1]) , (box[0] + box[2], box[1] + box[3]),(0,0,255), 2)
         cv2.imshow('Click Face', temp)
+        if cv2.waitKey(1) == ord('a'):
+            face = box
+            cv2.destroyAllWindows()
+            box = []
+            return face
         if cv2.waitKey(1) == 27:
             cv2.destroyAllWindows()
-            break            
-    face = box
-    box = []
-    return face
+            box = []
+            return []
+    
 
 
 def FindLargestFace(gray, faceCascades):
@@ -105,7 +109,10 @@ if __name__ == "__main__":
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         face = FindLargestFace(gray, faceCascades)
-
+        
+        if not face:
+            continue
+        
         eyeAngle = FindEyeAngle(gray, face)
 
 
