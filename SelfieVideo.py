@@ -17,12 +17,24 @@ def HistEqualisationColour(img):
     return cv2.cvtColor(ycrcb,cv.CV_YCrCb2BGR);    
 
 box = []
-temp = []
-def OnMouse(event, x, y, flags):
+drawingBox = False
+
+def OnMouse(event, x, y, flags, params):
+    global box, drawingBox
     if event == cv.CV_EVENT_LBUTTONDOWN:
-        print 'Mouse Position: '+x+', '+y
-        box.append(x, y)
-        cv2.circle(temp,(x,y), 3, (0,0,255), -1)
+        drawingBox = True
+        print 'Start Mouse Position: '+str(x)+', '+str(y)
+        box = (x, y , 0, 0)
+    elif event == cv.CV_EVENT_LBUTTONUP:
+        drawingBox = False
+        print 'End Mouse Position: '+str(x)+', '+str(y)
+        box = (box[0], box[1] , x - box[0] ,y - box[1])        
+        print box
+    if event == cv.CV_EVENT_MOUSEMOVE and drawingBox:
+        box = (box[0], box[1] , x - box[0] ,y - box[1])
+        
+
+        
 
 if __name__ == "__main__":
     imgs = glob.glob("images/*.jpg")
@@ -60,19 +72,26 @@ if __name__ == "__main__":
                 else:
                     faces = np.concatenate((faces,f))    
 
-
+        #if no face is found manually select face
         if len(faces) == 0:
-            temp = img.copy() 
-            cv.SetMouseCallback('Click Face', on_mouse, 0)
             cv2.namedWindow('Click Face')
-            cv2.imshow('Click Face', temp)
-            cv2.waitKey(0)
-            face = (box[0][0], box[0][1] , box[1][0] - box[0][0] ,box[1][1] - box[0][1])
+            cv.SetMouseCallback('Click Face', OnMouse, 0)
+            while(1):
+                temp = img.copy()
+                if box:
+                    cv2.rectangle(temp, (box[0],box[1]) , (box[0] + box[2], box[1] + box[3]),(0,0,255), 2)
+                cv2.imshow('Click Face', temp)
+                if cv2.waitKey(1) == 27:
+                    cv2.destroyAllWindows()
+                    break
+            
+            face = box
             box = []
-        
-        
-        #Sort to get the largest face  
-        face = sorted(faces, key=lambda x: x[3])[-1]      
+            
+        else:
+            #Sort to get the largest face  
+            face = sorted(faces, key=lambda x: x[3])[-1]      
+
         (x,y,w,h) = face
 
 
