@@ -9,7 +9,7 @@ http://youtu.be/jdFhhSro-xA
 
 Put your images in ./images
 
-Set the output image size, the scaling, the framerate and the position that you want the faces to align in the file.
+Set the output image size, the desired face size and the framerate.
 
 If the face isn't found a selection window will appear. Draw a box around the face and press "ESC" when you're happy.
 
