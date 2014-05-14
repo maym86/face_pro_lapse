@@ -38,13 +38,15 @@ if __name__ == "__main__":
     
     for fname in imgs:
         img = cv2.imread(fname)
+
+        img = cv2.resize(img, (0,0), fx=0.5, fy=0.5)
         #img = HistEqualisationColour(img)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # find faces in the image using all possible Haar cascades
         faces = []
         for cascade in face_cascade:
-            f = cascade.detectMultiScale(gray)
+            f = cascade.detectMultiScale(gray, minSize=(200,100))
             if len(f) > 0:
                 if len(faces) == 0:
                     faces = f
