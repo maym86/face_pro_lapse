@@ -1,4 +1,9 @@
 #! /usr/bin/env python
+# SelfieVideo.py 
+# Detect largest face in an image and align to create a time lapse video
+# by Michael May (http://maym86.com/) maym86@gmail.com
+
+
 import os
 import sys
 import cv2, cv
