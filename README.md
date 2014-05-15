@@ -1,5 +1,6 @@
 Face Pro Lapse - Selfie Timelapse
 ==================================
+by Michael May (http://maym86.com/) maym86@gmail.com
 
 Yep, made something for selfies. Shoot me.
 
@@ -14,3 +15,7 @@ Set the output image size, the desired face size and the framerate in the main m
 If the face isn't found a selection window will appear if the manualMode variable is set True. Draw a box around the face and press "a" when you're happy or "ESC" to skip that image.
 
 YOLO :-/
+
+
+
+
