@@ -33,27 +33,27 @@ def SelectFaceManually(img):
     global box
     cv2.namedWindow('Click Face')
     cv.SetMouseCallback('Click Face', OnMouse, 0)
+    box = []
     while(1):
-        temp = img.copy()
-        if box:
+        temp = cv2.resize(img, (0,0), fx=0.5, fy=0.5)
+        if box and box[2] != 0 and box[3] != 0:
             cv2.rectangle(temp, (box[0],box[1]) , (box[0] + box[2], box[1] + box[3]),(0,0,255), 2)
+        
+            if cv2.waitKey(1) == ord('a'):
+                cv2.destroyAllWindows()
+                return (box[0] * 2, box[1] * 2, box[2] * 2, box[3] * 2)
+
         cv2.imshow('Click Face', temp)
-        if cv2.waitKey(1) == ord('a'):
-            face = box
-            cv2.destroyAllWindows()
-            box = []
-            return face
         if cv2.waitKey(1) == 27:
             cv2.destroyAllWindows()
-            box = []
             return []
         
 
-def FindLargestFace(gray, faceCascades, manualMode):
+def FindLargestFace(gray, faceCascades, manualMode, minHaarFaceSize):
     # find faces in the image using all possible Haar cascades
     faces = []
     for cascade in faceCascades:
-        f = cascade.detectMultiScale(gray, minSize=(200,100))
+        f = cascade.detectMultiScale(gray, minSize=minHaarFaceSize)
         if len(f) > 0:
             if len(faces) == 0:
                 faces = f
@@ -84,19 +84,25 @@ def FindEyeAngle(gray, face):
     return eyeAngle
 
 
-def HistEqualisationColour(img):
+def HistEqualisationColour(img, clipLimit):
     ycrcb = cv2.cvtColor(img, cv.CV_BGR2YCrCb)
     y,Cr,Cb = cv2.split(ycrcb)
 
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    clahe = cv2.createCLAHE(clipLimit=clipLimit, tileGridSize=(8,8))
     y = clahe.apply(y)
     #y = cv2.equalizeHist(y);
     ycrcb = cv2.merge((y,Cr,Cb))
     return cv2.cvtColor(ycrcb,cv.CV_YCrCb2BGR);
 
+
+def GammaCorrection(img, correction):
+    img = img/255.0
+    img = cv2.pow(img, correction)
+    return np.uint8(img*255)
+
+
 #if rect is not drawn from top left set so it is
 def SetRectOrigin(rect):
-
     (x,y,w,h) = rect 
     if(w < 0):
         x = x + w
@@ -109,7 +115,6 @@ def SetRectOrigin(rect):
     return (x,y,w,h)
 
 def PositionImage(img, face, eyeAngle):
-
     face = SetRectOrigin(face)   
 
     #rescale to desired face size
@@ -131,16 +136,31 @@ def PositionImage(img, face, eyeAngle):
 
     return translated
 
+def ResizeFrame(img, videoSize):
+    scl = 1
+    if(img.shape[0] > img.shape[1]):
+        scl = float(videoSize[0]) / float(img.shape[0])
+    else:
+        scl = float(videoSize[1])/ float(img.shape[1])
+
+    img = cv2.resize(img, (0,0), fx=scl, fy=scl)
+            
+    return img
+
 
 if __name__ == "__main__":
     imgs = glob.glob("images/*.jpg")
 
     #Parameters
-    fps = 4.0
-    faceHeight = 300
+    fps = 8.0
+    faceHeight = 400
     videoSize = (1280 ,720)
     manualMode = True
-    histEq = True
+    correctColour = False
+    #min size of the face found by the Haar cascade
+    minHaarFaceSize = (200,200)
+    #####
+
     
     centre = (videoSize[0]/2,videoSize[1]/2)    
     faceCascades = []
@@ -156,13 +176,22 @@ if __name__ == "__main__":
     
     for fname in imgs:
         img = cv2.imread(fname)
-        img = cv2.resize(img, (0,0), fx=0.5, fy=0.5)
-        if histEq:
-            img = HistEqualisationColour(img)
-            
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        face = FindLargestFace(gray, faceCascades, manualMode)
+        img = ResizeFrame(img, videoSize)
+       
+            
+        if correctColour:
+            img = GammaCorrection(img,0.8)
+            img = HistEqualisationColour(img, 2.0)
+            
+        
+        #border added for faces at edges
+        border = int(faceHeight/2)
+        img= cv2.copyMakeBorder(img,border,border,border,border,cv2.BORDER_CONSTANT)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        gray = cv2.equalizeHist(gray)
+
+        face = FindLargestFace(gray, faceCascades, manualMode, minHaarFaceSize)
         
         if face == []:
             continue
