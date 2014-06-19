@@ -87,14 +87,33 @@ def FindEyeAngle(gray, face):
 def HistEqualisationColour(img):
     ycrcb = cv2.cvtColor(img, cv.CV_BGR2YCrCb)
     y,Cr,Cb = cv2.split(ycrcb)
-    y = cv2.equalizeHist(y);
+
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    y = clahe.apply(y)
+    #y = cv2.equalizeHist(y);
     ycrcb = cv2.merge((y,Cr,Cb))
     return cv2.cvtColor(ycrcb,cv.CV_YCrCb2BGR);
 
+#if rect is not drawn from top left set so it is
+def SetRectOrigin(rect):
+
+    (x,y,w,h) = rect 
+    if(w < 0):
+        x = x + w
+        w = -w
+        
+    if (h < 0):
+        y = y + h
+        h = -h
+
+    return (x,y,w,h)
 
 def PositionImage(img, face, eyeAngle):
-    #rescale to desired face size  
-    scale = float(faceHeight) / float(face[3])
+
+    face = SetRectOrigin(face)   
+
+    #rescale to desired face size
+    scale = float(faceHeight) / float(abs(face[3]))
     scaled = cv2.resize(img, (0,0), fx=scale, fy=scale)
 
     #rescale face rect
@@ -121,6 +140,7 @@ if __name__ == "__main__":
     faceHeight = 300
     videoSize = (1280 ,720)
     manualMode = True
+    histEq = True
     
     centre = (videoSize[0]/2,videoSize[1]/2)    
     faceCascades = []
@@ -137,7 +157,9 @@ if __name__ == "__main__":
     for fname in imgs:
         img = cv2.imread(fname)
         img = cv2.resize(img, (0,0), fx=0.5, fy=0.5)
-        #img = HistEqualisationColour(img)
+        if histEq:
+            img = HistEqualisationColour(img)
+            
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         face = FindLargestFace(gray, faceCascades, manualMode)
