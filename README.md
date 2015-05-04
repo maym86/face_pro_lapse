@@ -1,4 +1,4 @@
-FaceLapse - Selfie Timelapse
+Face Lapse Pro - Selfie Timelapse
 ==================================
 by Michael May (http://maym86.com/) maym86@gmail.com
 
