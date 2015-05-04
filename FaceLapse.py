@@ -185,7 +185,7 @@ def SetGamma(img, gamma):
     return np.uint8(img*255)
 
 
-if __name__ == "__main__":
+def main:
     imgs = glob.glob("images/*.jpg")
 
     #Parameters
@@ -243,3 +243,5 @@ if __name__ == "__main__":
     cv2.destroyAllWindows()
                 
             
+if __name__ == "__main__":
+    main()
