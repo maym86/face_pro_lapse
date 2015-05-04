@@ -185,7 +185,7 @@ def SetGamma(img, gamma):
     return np.uint8(img*255)
 
 
-def main:
+def main():
     imgs = glob.glob("images/*.jpg")
 
     #Parameters
