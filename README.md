@@ -1,6 +1,6 @@
 Face Lapse Pro - Selfie Timelapse
 ==================================
-by Michael May (http://maym86.com/) maym86@gmail.com
+by Michael May
 
 Yep, made something for selfies. Shoot me.
 
