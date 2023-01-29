@@ -12,12 +12,14 @@ import math
 box = []
 drawing_box = False
 
-# Handles mouse events for the manual face selection
-#
-# @param event		Mouse event
-# @param x		X position of pointer
-# @param y		Y position of pointer
+
 def on_mouse(event, x, y, flags, params):
+    """
+    Handles mouse events for the manual face selection
+    @param event		Mouse event
+    @param x		X position of pointer
+    @param y		Y position of pointer
+    """
     global box, drawing_box
     if event == cv2.EVENT_LBUTTONDOWN:
         drawing_box = True
@@ -32,13 +34,14 @@ def on_mouse(event, x, y, flags, params):
         box = (box[0], box[1], x - box[0], y - box[1])
 
 
-# Returns the face rect selected manually.
-#
-# @param image		Image with face
-# @returns box          Rect with face location
 def select_face_manually(image, border):
+    """
+    Returns the face rect selected manually.
+    Detection Failed. Select face with mouse. Press 'a' to accept.
+    @param image		Image with face
+    @returns box          Rect with face location
+    """
     global box
-    print("Detection Failed. Select face with mouse. Press 'a' to accept.")
     cv2.namedWindow('Click Face')
     cv2.setMouseCallback('Click Face', on_mouse, 0)
     box = []
@@ -48,7 +51,7 @@ def select_face_manually(image, border):
             cv2.rectangle(
                 temp, (box[0], box[1]), (box[0] + box[2], box[1] + box[3]), (0, 0, 255), 2)
 
-            if cv2.waitKey(50) == ord('a'):
+            if cv2.waitKey(1) == ord('a'):
                 cv2.destroyAllWindows()
                 return (box[0] * 2) - border, (box[1] * 2) - border, box[2] * 2, box[3] * 2
 
@@ -58,11 +61,13 @@ def select_face_manually(image, border):
             return []
 
 
-# Normalises the face rect so that it is drawn from the top left
-#
-# @param rect		Rect with face location
-# @returns rect         Rect with face location with top left origin
 def set_rect_origin(rect):
+    """
+    Normalises the face rect so that it is drawn from the top left
+
+    @param rect		Rect with face location
+    @returns rect         Rect with face location with top left origin
+    """
     (x, y, w, h) = rect
     if w < 0:
         x = x + w
@@ -75,15 +80,16 @@ def set_rect_origin(rect):
     return x, y, w, h
 
 
-# Finds the largest face in an image
-#
-# @param gray		    Greyscale image containing face
-# @param faceCascades	    Haar cascades
-# @param manualMode	    Bool to set whether or not manual mode will be used if face is not found
-# @param minHaarFaceSize    The minimum size of the face in px which the Haar cascade will detect
-# @returns rect             Rect with face location with top left origin
 def find_largest_face(gray, face_cascades, manual_mode, min_haar_face_size, colour_img, border):
-    # find faces in the image using all possible Haar cascades
+    """
+    Finds the largest face in an image using all possible Haar cascades
+
+    @param gray		    Greyscale image containing face
+    @param faceCascades	    Haar cascades
+    @param manualMode	    Bool to set whether or not manual mode will be used if face is not found
+    @param minHaarFaceSize    The minimum size of the face in px which the Haar cascade will detect
+    @returns rect             Rect with face location with top left origin
+    """
     faces = []
     for cascade in face_cascades:
         face = cascade.detectMultiScale(gray, minSize=min_haar_face_size)
@@ -106,12 +112,14 @@ def find_largest_face(gray, face_cascades, manual_mode, min_haar_face_size, colo
     return face
 
 
-# Finds the angle between x axis and a vector connecting the eyes
-#
-# @param gray		    Greyscale image containing face
-# @param face	            Rect defining the face location
-# @returns eyeAngle         Value in radians defining the angle
 def find_eye_angle(gray, face, eye_cascade):
+    """
+    Finds the angle between x axis and a vector connecting the eyes
+
+    @param gray		    Greyscale image containing face
+    @param face	            Rect defining the face location
+    @returns eyeAngle         Value in radians defining the angle
+    """
     (x, y, w, h) = face
     # try to find eyes to get head rotation
     face_roi_gray = gray[y:y + h, x:x + w]
@@ -124,13 +132,15 @@ def find_eye_angle(gray, face, eye_cascade):
     return eye_angle
 
 
-# Positions the image so the face is located at the centre
-#
-# @param img		    Image containing face
-# @param face	            Rect defining the face location
-# @param eyeAngle           Value in radians defining the angle
-# @returns img              Image with face rotated and centred in the image
 def position_image(img, face, eye_angle, face_height, video_centre, video_out_size):
+    """
+    Positions the image so the face is located at the centre
+
+    @param img		    Image containing face
+    @param face	            Rect defining the face location
+    @param eyeAngle           Value in radians defining the angle
+    @returns img              Image with face rotated and centred in the image
+    """
     face = set_rect_origin(face)
 
     # rescale to desired face size
@@ -154,12 +164,14 @@ def position_image(img, face, eye_angle, face_height, video_centre, video_out_si
     return translated
 
 
-# Resizes the image intelligently for face detection based on the height and width of the target video
-#
-# @param img		    Image containing face
-# @param videoSize          The size of the target video
-# @returns img              Scaled image
 def resize_frame(img, videoSize):
+    """
+    Resizes the image intelligently for face detection based on the height and width of the target video
+
+    @param img		    Image containing face
+    @param videoSize          The size of the target video
+    @returns img              Scaled image
+    """
     scl = 1
     if img.shape[0] > img.shape[1]:
         scl = float(videoSize[0]) / float(img.shape[0])
@@ -169,12 +181,14 @@ def resize_frame(img, videoSize):
     return img
 
 
-# Performs histogram equalisation on the image using the CLAHE method
-#
-# @param img		    Image containing face
-# @param clipLimit          The CLAHE clip limit
-# @returns img              Equalised image
 def hist_equalisation_colour(img, clipLimit):
+    """
+    Performs histogram equalisation on the image using the CLAHE method
+
+    @param img		    Image containing face
+    @param clipLimit          The CLAHE clip limit
+    @returns img              Equalised image
+    """
     ycrcb = cv2.cvtColor(img, cv.CV_BGR2YCrCb)
     y, Cr, Cb = cv2.split(ycrcb)
 
@@ -185,12 +199,14 @@ def hist_equalisation_colour(img, clipLimit):
     return cv2.cvtColor(ycrcb, cv.CV_YCrCb2BGR)
 
 
-# Set the gamma of the image
-#
-# @param img		    Image containing face
-# @param gamma              The gamma value to be set
-# @returns img              Image with new gamma value
 def set_gamma(img, gamma):
+    """
+    Set the gamma of the image
+
+    @param img		    Image containing face
+    @param gamma              The gamma value to be set
+    @returns img              Image with new gamma value
+    """
     img /= 255.0
     img = cv2.pow(img, gamma)
     return np.uint8(img * 255)
@@ -209,10 +225,11 @@ def main():
     min_haar_face_size = (200, 200)
 
     video_centre = (video_out_size[0] / 2, video_out_size[1] / 2)
-    face_cascades = [cv2.CascadeClassifier('haarcascade_frontalface_alt.xml'),
-                     cv2.CascadeClassifier(
-                         'haarcascade_frontalface_default.xml'),
-                     cv2.CascadeClassifier('haarcascade_eye_tree_eyeglasses.xml')]
+    face_cascades = [
+        cv2.CascadeClassifier('haarcascade_frontalface_alt.xml'),
+        cv2.CascadeClassifier('haarcascade_frontalface_default.xml'),
+        cv2.CascadeClassifier('haarcascade_eye_tree_eyeglasses.xml'),
+    ]
 
     eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
 
