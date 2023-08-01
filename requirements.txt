@@ -1,0 +1,2 @@
+cv>=1
+opencv-python>=4

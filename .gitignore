@@ -214,4 +214,8 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 
+# Virtual env
+venv/
+
+
 *.avi
